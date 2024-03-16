@@ -1,0 +1,52 @@
+{
+  "items": [
+    {
+      "_id": "64b26ad62f1689a7fda65922",
+      "ItemName": "Chicken Momo Updated",
+      "ItemImage": "IMG-1689417080288.jpg",
+      "ItemCode": "Chi-Momo",
+      "Brand": "",
+      "Category": "momo",
+      "Discount": 5,
+      "UnitPrice": 120,
+      "IsActive": true
+    },
+    {
+      "_id": "64b26ef92f1689a7fda6592e",
+      "ItemName": "Chicken Momo Updated",
+      "ItemImage": "IMG-1689416665463.jpg",
+      "ItemCode": "Chi-Momo",
+      "Brand": "",
+      "Category": "momo",
+      "Discount": 5,
+      "UnitPrice": 120,
+      "IsActive": true
+    },
+    {
+      "_id": "64b274f7ed4286c0e1b430de",
+      "ItemName": "Chicken Momo",
+      "ItemImage": "IMG-1689416951262.jpg",
+      "ItemCode": "Chi-Momo",
+      "Brand": "",
+      "Category": "momo",
+      "Discount": 5,
+      "UnitPrice": 120,
+      "IsActive": true
+    },
+    {
+      "_id": "64b2755eed4286c0e1b430e7",
+      "ItemName": "Chicken Momo",
+      "ItemImage": "IMG-1689417054771.jpg",
+      "ItemCode": "Chi-Momo",
+      "Brand": "",
+      "Category": "momo",
+      "Discount": 5,
+      "UnitPrice": 120,
+      "IsActive": true
+    }
+  ],
+  "totalItems": 4,
+  "totalPages": 1,
+  "currentPage": 1,
+  "perPage": 10
+}
