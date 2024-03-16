@@ -11,7 +11,6 @@ import productRouter from "./routes/inventory";
 import orderRouter from "./routes/order";
 import productCategoriesRouter from "./routes/productCategory";
 import { CustomError, IErrorResponse } from "./utils/error-handler";
-import { logAPICall } from "./utils/logger";
 
 dotenv.config();
 
@@ -22,11 +21,13 @@ const app = express();
 app.use(cookieParser());
 
 // Middleware
-app.use(cors({ origin: "https://localhost:3000" }));
+app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
-app.use(logAPICall);
 // Mount the authentication routes
+app.get("/", (req: Request, res: Response) => {
+  res.send("Api is working");
+});
 app.use("/auth", authRouter);
 app.use("/product", productRouter);
 app.use("/order", orderRouter);
