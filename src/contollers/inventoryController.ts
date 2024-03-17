@@ -3,8 +3,10 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { IProductCategory, IRequest } from "../interfaces/inventoryInterfaces";
+import { Supplier } from "../interfaces/supplierInterfaces";
 import InventoryModel from "../modal/inventoryModal";
 import ProductCategoryModel from "../modal/productCategoryModal";
+import SupplierModal from "../modal/supplierModal";
 import { paginate } from "../utils/paginate";
 
 export async function createUpdateProduct(req: Request, res: Response) {
@@ -14,6 +16,7 @@ export async function createUpdateProduct(req: Request, res: Response) {
       id,
       name,
       category,
+      supplier,
       manufacturer,
       manufactureDate,
       formulation,
@@ -35,6 +38,7 @@ export async function createUpdateProduct(req: Request, res: Response) {
     const request = {
       name,
       category,
+      supplier,
       manufacturer,
       manufactureDate,
       formulation,
@@ -94,11 +98,18 @@ export async function getAllProducts(req: Request, res: Response) {
 
     const PaginationResult = await paginate(
       InventoryModel,
-      InventoryModel.find(queryCondition).populate({
-        path: "category", // Field to populate
-        model: "ProductCategory", // Model to reference
-        select: "categoryName", // Field to select from the referenced model
-      }),
+      InventoryModel.find(queryCondition).populate([
+        {
+          path: "category", // Field to populate
+          model: "ProductCategory", // Model to reference
+          select: "categoryName", // Field to select from the referenced model
+        },
+        {
+          path: "supplier", // Field to populate
+          model: "Supplier", // Model to reference
+          select: "supplierName", // Field to select from the referenced model
+        },
+      ]),
       page,
       perPage
     );
@@ -115,8 +126,13 @@ export async function getAddProductData(req: Request, res: Response) {
       isActive: true,
     }).select("categoryName");
 
+    const suppliers: Supplier[] = await SupplierModal.find({
+      isActive: true,
+    }).select("supplierName");
+
     const response = {
       productCategories: categories,
+      suppliers: suppliers,
     };
     res.status(200).json(response);
   } catch (error) {

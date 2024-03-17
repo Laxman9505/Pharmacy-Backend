@@ -25,6 +25,11 @@ const InventorySchema: Schema = new Schema<IRequest>(
       ref: "ProductCategory",
       required: true,
     },
+    supplier: {
+      type: Schema.Types.ObjectId,
+      ref: "Supplier",
+      required: true,
+    },
     manufacturer: {
       type: String,
     },

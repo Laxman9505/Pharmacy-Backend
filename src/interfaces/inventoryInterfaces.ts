@@ -13,6 +13,7 @@ export interface IRequest extends Document {
   name: string;
   image: string;
   category: ObjectId;
+  supplier: ObjectId;
   manufacturer: string;
   formulation: string;
   strength: string;

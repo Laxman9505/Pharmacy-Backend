@@ -23,6 +23,11 @@ const InventorySchema = new mongoose_1.Schema({
         ref: "ProductCategory",
         required: true,
     },
+    supplier: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "Supplier",
+        required: true,
+    },
     manufacturer: {
         type: String,
     },

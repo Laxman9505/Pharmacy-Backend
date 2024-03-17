@@ -14,6 +14,7 @@ const customer_1 = __importDefault(require("./routes/customer"));
 const inventory_1 = __importDefault(require("./routes/inventory"));
 const order_1 = __importDefault(require("./routes/order"));
 const productCategory_1 = __importDefault(require("./routes/productCategory"));
+const supplier_1 = __importDefault(require("./routes/supplier"));
 const error_handler_1 = require("./utils/error-handler");
 dotenv_1.default.config();
 // import userRoutes from "./routes/userRoutes";
@@ -31,6 +32,7 @@ app.use("/auth", auth_1.default);
 app.use("/product", inventory_1.default);
 app.use("/order", order_1.default);
 app.use("/product-category", productCategory_1.default);
+app.use("/supplier", supplier_1.default);
 app.use("/customer", customer_1.default);
 app.use((error, req, res, next) => {
     if (error instanceof error_handler_1.CustomError) {

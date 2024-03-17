@@ -17,16 +17,18 @@ exports.deleteProduct = exports.getAddProductData = exports.getAllProducts = exp
 const mongoose_1 = __importDefault(require("mongoose"));
 const inventoryModal_1 = __importDefault(require("../modal/inventoryModal"));
 const productCategoryModal_1 = __importDefault(require("../modal/productCategoryModal"));
+const supplierModal_1 = __importDefault(require("../modal/supplierModal"));
 const paginate_1 = require("../utils/paginate");
 function createUpdateProduct(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const RequestBody = req.body;
-            const { id, name, category, manufacturer, manufactureDate, formulation, strength, reorderLevel, quantityInStock, expirationDate, description, barcode, isActive, buyingPrice, price, invoiceNo, invoiceDate, blockNo, } = RequestBody;
+            const { id, name, category, supplier, manufacturer, manufactureDate, formulation, strength, reorderLevel, quantityInStock, expirationDate, description, barcode, isActive, buyingPrice, price, invoiceNo, invoiceDate, blockNo, } = RequestBody;
             // Create a new request object
             const request = {
                 name,
                 category,
+                supplier,
                 manufacturer,
                 manufactureDate,
                 formulation,
@@ -81,11 +83,18 @@ function getAllProducts(req, res) {
                     ],
                 }
                 : {};
-            const PaginationResult = yield (0, paginate_1.paginate)(inventoryModal_1.default, inventoryModal_1.default.find(queryCondition).populate({
-                path: "category",
-                model: "ProductCategory",
-                select: "categoryName", // Field to select from the referenced model
-            }), page, perPage);
+            const PaginationResult = yield (0, paginate_1.paginate)(inventoryModal_1.default, inventoryModal_1.default.find(queryCondition).populate([
+                {
+                    path: "category",
+                    model: "ProductCategory",
+                    select: "categoryName", // Field to select from the referenced model
+                },
+                {
+                    path: "supplier",
+                    model: "Supplier",
+                    select: "supplierName", // Field to select from the referenced model
+                },
+            ]), page, perPage);
             res.status(200).json(PaginationResult);
         }
         catch (error) {
@@ -101,8 +110,12 @@ function getAddProductData(req, res) {
             const categories = yield productCategoryModal_1.default.find({
                 isActive: true,
             }).select("categoryName");
+            const suppliers = yield supplierModal_1.default.find({
+                isActive: true,
+            }).select("supplierName");
             const response = {
                 productCategories: categories,
+                suppliers: suppliers,
             };
             res.status(200).json(response);
         }
