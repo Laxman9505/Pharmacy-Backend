@@ -26,6 +26,9 @@ export async function createUpdateProduct(req: Request, res: Response) {
       isActive,
       buyingPrice,
       price,
+      invoiceNo,
+      invoiceDate,
+      blockNo,
     } = RequestBody as IRequest;
 
     // Create a new request object
@@ -44,6 +47,9 @@ export async function createUpdateProduct(req: Request, res: Response) {
       isActive,
       buyingPrice,
       price,
+      invoiceNo,
+      invoiceDate,
+      blockNo,
     };
 
     if (id) {
@@ -73,9 +79,8 @@ export async function createUpdateProduct(req: Request, res: Response) {
 export async function getAllProducts(req: Request, res: Response) {
   try {
     const page: number = parseInt(req.query.page as string) || 1;
-    const perPage: number = parseInt(req.query.perPage as string) || 10;
+    const perPage: number = parseInt(req.query.perPage as string) || 30;
     const searchKeyword: string = (req.query.searchKeyword as string) || "";
-    const searchPattern: RegExp = new RegExp(searchKeyword, "i");
 
     const queryCondition =
       searchKeyword.trim().length > 0

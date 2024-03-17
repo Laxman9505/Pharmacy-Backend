@@ -61,6 +61,15 @@ const InventorySchema: Schema = new Schema<IRequest>(
     imageUrl: {
       type: String,
     },
+    invoiceNo: {
+      type: String,
+    },
+    invoiceDate: {
+      type: String,
+    },
+    blockNo: {
+      type: String,
+    },
   },
   {
     versionKey: false,

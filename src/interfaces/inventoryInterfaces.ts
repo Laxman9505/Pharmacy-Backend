@@ -26,6 +26,9 @@ export interface IRequest extends Document {
   price: number;
   barcode: string;
   isActive: boolean;
+  blockNo?: string;
+  invoiceNo?: string;
+  invoiceDate: string;
   imageUrl?: string;
   createdDate?: Date;
   updatedDate?: Date;
