@@ -15,7 +15,6 @@ const inventory_1 = __importDefault(require("./routes/inventory"));
 const order_1 = __importDefault(require("./routes/order"));
 const productCategory_1 = __importDefault(require("./routes/productCategory"));
 const error_handler_1 = require("./utils/error-handler");
-const logger_1 = require("./utils/logger");
 dotenv_1.default.config();
 // import userRoutes from "./routes/userRoutes";
 const app = (0, express_1.default)();
@@ -24,7 +23,6 @@ app.use((0, cookie_parser_1.default)());
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use(express_1.default.static("public"));
-app.use(logger_1.logAPICall);
 // Mount the authentication routes
 app.get("/", (req, res) => {
     res.send("Api is working");

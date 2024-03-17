@@ -59,6 +59,15 @@ const InventorySchema = new mongoose_1.Schema({
     imageUrl: {
         type: String,
     },
+    invoiceNo: {
+        type: String,
+    },
+    invoiceDate: {
+        type: String,
+    },
+    blockNo: {
+        type: String,
+    },
 }, {
     versionKey: false,
     toJSON: { virtuals: true },

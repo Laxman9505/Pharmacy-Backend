@@ -22,7 +22,7 @@ function createUpdateProduct(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const RequestBody = req.body;
-            const { id, name, category, manufacturer, manufactureDate, formulation, strength, reorderLevel, quantityInStock, expirationDate, description, barcode, isActive, buyingPrice, price, } = RequestBody;
+            const { id, name, category, manufacturer, manufactureDate, formulation, strength, reorderLevel, quantityInStock, expirationDate, description, barcode, isActive, buyingPrice, price, invoiceNo, invoiceDate, blockNo, } = RequestBody;
             // Create a new request object
             const request = {
                 name,
@@ -39,6 +39,9 @@ function createUpdateProduct(req, res) {
                 isActive,
                 buyingPrice,
                 price,
+                invoiceNo,
+                invoiceDate,
+                blockNo,
             };
             if (id) {
                 yield inventoryModal_1.default.findByIdAndUpdate(id, Object.assign({}, request));
@@ -68,15 +71,13 @@ function getAllProducts(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const page = parseInt(req.query.page) || 1;
-            const perPage = parseInt(req.query.perPage) || 10;
+            const perPage = parseInt(req.query.perPage) || 30;
             const searchKeyword = req.query.searchKeyword || "";
-            const searchPattern = new RegExp(searchKeyword, "i");
             const queryCondition = searchKeyword.trim().length > 0
                 ? {
                     $or: [
-                        { name: { $regex: searchPattern } },
-                        { manufacturer: { $regex: searchPattern } },
-                        { category: { $regex: searchPattern } },
+                        { name: { $regex: new RegExp(searchKeyword, "i") } },
+                        { manufacturer: { $regex: new RegExp(searchKeyword, "i") } },
                     ],
                 }
                 : {};
