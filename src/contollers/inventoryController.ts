@@ -81,9 +81,8 @@ export async function getAllProducts(req: Request, res: Response) {
       searchKeyword.trim().length > 0
         ? {
             $or: [
-              { name: { $regex: searchPattern } },
-              { manufacturer: { $regex: searchPattern } },
-              { category: { $regex: searchPattern } },
+              { name: { $regex: new RegExp(searchKeyword, "i") } },
+              { manufacturer: { $regex: new RegExp(searchKeyword, "i") } },
             ],
           }
         : {};
