@@ -21,8 +21,17 @@ function getAllProductCategories(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const page = parseInt(req.query.page) || 1;
-            const pageSize = parseInt(req.query.pageSize) || 1;
-            const paginationResult = yield (0, paginate_1.paginate)(productCategoryModal_1.default, productCategoryModal_1.default.find(), page, pageSize);
+            const perPage = parseInt(req.query.pageSize) || 1;
+            const searchKeyword = req.query.searchKeyword || "";
+            const queryCondition = searchKeyword.trim().length > 0
+                ? {
+                    $or: [
+                        { categoryName: { $regex: new RegExp(searchKeyword, "i") } },
+                        { description: { $regex: new RegExp(searchKeyword, "i") } },
+                    ],
+                }
+                : {};
+            const paginationResult = yield (0, paginate_1.paginate)(productCategoryModal_1.default, productCategoryModal_1.default.find(queryCondition), page, perPage);
             res.status(200).json(paginationResult);
         }
         catch (error) {

@@ -22,7 +22,18 @@ function getAllSuppliers(req, res) {
         try {
             const page = parseInt(req.query.page) || 1;
             const pageSize = parseInt(req.query.pageSize) || 1;
-            const paginationResult = yield (0, paginate_1.paginate)(supplierModal_1.default, supplierModal_1.default.find(), page, pageSize);
+            const searchKeyword = req.query.searchKeyword || "";
+            const searchPattern = new RegExp(searchKeyword, "i");
+            const queryCondition = searchKeyword.trim().length > 0
+                ? {
+                    $or: [
+                        { supplierName: { $regex: searchPattern } },
+                        { description: { $regex: searchPattern } },
+                        { supplierPAN: { $regex: searchPattern } },
+                    ],
+                }
+                : {};
+            const paginationResult = yield (0, paginate_1.paginate)(supplierModal_1.default, supplierModal_1.default.find(queryCondition), page, pageSize);
             res.status(200).json(paginationResult);
         }
         catch (error) {

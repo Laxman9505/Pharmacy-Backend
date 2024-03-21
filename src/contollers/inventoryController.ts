@@ -83,7 +83,7 @@ export async function createUpdateProduct(req: Request, res: Response) {
 export async function getAllProducts(req: Request, res: Response) {
   try {
     const page: number = parseInt(req.query.page as string) || 1;
-    const perPage: number = parseInt(req.query.perPage as string) || 20;
+    const perPage: number = parseInt(req.query.pageSize as string) || 10;
     const searchKeyword: string = (req.query.searchKeyword as string) || "";
 
     const queryCondition =

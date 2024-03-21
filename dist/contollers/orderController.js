@@ -65,9 +65,21 @@ function getNewOrderCreationData(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Fetch all categories
+            const searchKeyword = req.query.searchKeyword || "";
+            const searchPattern = new RegExp(searchKeyword, "i");
+            const queryCondition = searchKeyword.trim().length > 0
+                ? {
+                    $or: [
+                        {
+                            name: { $regex: searchPattern },
+                            manufacturer: { $regex: searchPattern },
+                        },
+                    ],
+                }
+                : {};
             const categories = yield productCategoryModal_1.default.find({}, { _id: 1, categoryName: 1 });
             // Fetch products and populate the 'category' field
-            const productsByCategory = yield inventoryModal_1.default.find({})
+            const productsByCategory = yield inventoryModal_1.default.find(queryCondition)
                 .populate("category", "categoryName")
                 .lean();
             // Organize products by category

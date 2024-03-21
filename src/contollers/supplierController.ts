@@ -11,10 +11,23 @@ export async function getAllSuppliers(req: Request, res: Response) {
   try {
     const page: number = parseInt(req.query.page as string) || 1;
     const pageSize: number = parseInt(req.query.pageSize as string) || 1;
+    const searchKeyword: string = (req.query.searchKeyword as string) || "";
+    const searchPattern: RegExp = new RegExp(searchKeyword, "i");
+
+    const queryCondition =
+      searchKeyword.trim().length > 0
+        ? {
+            $or: [
+              { supplierName: { $regex: searchPattern } },
+              { description: { $regex: searchPattern } },
+              { supplierPAN: { $regex: searchPattern } },
+            ],
+          }
+        : {};
 
     const paginationResult = await paginate(
       SupplierModal as any,
-      SupplierModal.find(),
+      SupplierModal.find(queryCondition),
       page,
       pageSize
     );

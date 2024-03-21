@@ -73,7 +73,7 @@ function getAllProducts(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const page = parseInt(req.query.page) || 1;
-            const perPage = parseInt(req.query.perPage) || 20;
+            const perPage = parseInt(req.query.pageSize) || 10;
             const searchKeyword = req.query.searchKeyword || "";
             const queryCondition = searchKeyword.trim().length > 0
                 ? {

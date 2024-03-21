@@ -9,13 +9,24 @@ import { paginate } from "../utils/paginate";
 export async function getAllProductCategories(req: Request, res: Response) {
   try {
     const page: number = parseInt(req.query.page as string) || 1;
-    const pageSize: number = parseInt(req.query.pageSize as string) || 1;
+    const perPage: number = parseInt(req.query.pageSize as string) || 1;
+    const searchKeyword: string = (req.query.searchKeyword as string) || "";
+
+    const queryCondition =
+      searchKeyword.trim().length > 0
+        ? {
+            $or: [
+              { categoryName: { $regex: new RegExp(searchKeyword, "i") } },
+              { description: { $regex: new RegExp(searchKeyword, "i") } },
+            ],
+          }
+        : {};
 
     const paginationResult = await paginate(
       ProductCategoryModel,
-      ProductCategoryModel.find(),
+      ProductCategoryModel.find(queryCondition),
       page,
-      pageSize
+      perPage
     );
     res.status(200).json(paginationResult);
   } catch (error) {

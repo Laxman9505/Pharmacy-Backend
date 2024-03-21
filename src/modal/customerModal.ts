@@ -24,5 +24,17 @@ const schema: Schema = new Schema<Customer>({
   },
 });
 
+schema.virtual("id").get(function (this: Customer) {
+  return this._id;
+});
+
+schema.set("toJSON", {
+  virtuals: true,
+  versionKey: false,
+  transform: (doc, ret) => {
+    delete ret._id;
+  },
+});
+
 const customerModal = model<Customer>("Customer", schema);
 export default customerModal;

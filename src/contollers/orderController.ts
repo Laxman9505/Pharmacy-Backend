@@ -48,13 +48,28 @@ export async function getAllOrders(req: Request, res: Response) {
 export async function getNewOrderCreationData(req: Request, res: Response) {
   try {
     // Fetch all categories
+    const searchKeyword: string = (req.query.searchKeyword as string) || "";
+    const searchPattern: RegExp = new RegExp(searchKeyword, "i");
+
+    const queryCondition =
+      searchKeyword.trim().length > 0
+        ? {
+            $or: [
+              {
+                name: { $regex: searchPattern },
+                manufacturer: { $regex: searchPattern },
+              },
+            ],
+          }
+        : {};
+
     const categories = await ProductCategoryModel.find(
       {},
       { _id: 1, categoryName: 1 }
     );
 
     // Fetch products and populate the 'category' field
-    const productsByCategory = await InventoryModel.find({})
+    const productsByCategory = await InventoryModel.find(queryCondition)
       .populate("category", "categoryName")
       .lean();
 

@@ -22,5 +22,15 @@ const schema = new mongoose_1.Schema({
         default: true,
     },
 });
+schema.virtual("id").get(function () {
+    return this._id;
+});
+schema.set("toJSON", {
+    virtuals: true,
+    versionKey: false,
+    transform: (doc, ret) => {
+        delete ret._id;
+    },
+});
 const customerModal = (0, mongoose_1.model)("Customer", schema);
 exports.default = customerModal;
