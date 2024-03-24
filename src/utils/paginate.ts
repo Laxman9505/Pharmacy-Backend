@@ -21,9 +21,10 @@ const paginate = async <T extends Document>(
   model: Model<T>,
   query: any = {},
   page: number,
-  perPage: number
+  perPage: number,
+  searchKeyword?: string
 ): Promise<PaginationResult<T>> => {
-  const skip = calculateSkip(page, perPage);
+  const skip = searchKeyword ? 0 : calculateSkip(page, perPage);
 
   const countQuery = model.countDocuments(query);
   const dataQuery = query.skip(skip).limit(perPage);

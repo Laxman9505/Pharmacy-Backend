@@ -111,7 +111,8 @@ export async function getAllProducts(req: Request, res: Response) {
         },
       ]),
       page,
-      perPage
+      perPage,
+      searchKeyword
     );
     res.status(200).json(PaginationResult);
   } catch (error) {

@@ -6,7 +6,7 @@ export interface Customer extends Document {
   firstName: string;
   lastName: string;
   email: string;
-  phoneNumber: string;
+  phoneNumber: number;
   address: string;
   gender: string;
   isActive: boolean;

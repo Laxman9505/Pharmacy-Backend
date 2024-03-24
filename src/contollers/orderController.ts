@@ -1,7 +1,6 @@
 /** @format */
 
 import { Request, Response } from "express";
-import { v4 as uuidv4 } from "uuid";
 import InventoryModel from "../modal/inventoryModal";
 import orderModel from "../modal/orderModal";
 import ProductCategoryModel from "../modal/productCategoryModal";
@@ -10,22 +9,35 @@ import { paginate } from "../utils/paginate";
 export async function placeOrder(req: Request, res: Response) {
   try {
     // Generate the order ID
-    const orderId = uuidv4();
-    const { ProductList, CustomerName, CustomerAddress, TotalAmount } =
-      req.body;
+
+    const {
+      customerDataModel,
+      customerId,
+      products,
+      paymentMethod,
+      orderDescription,
+      totalPaymentAmount,
+      orderStatus,
+      paidAmount,
+      remainingAmount,
+      orderDate,
+    } = req.body;
     const newOrder = new orderModel({
-      OrderId: orderId,
-      CustomerName: CustomerName,
-      CustomerAddress: CustomerAddress,
-      ProductList: ProductList,
-      TotalAmount: TotalAmount,
-      OrderStatus: "Placed",
-      OrderDate: Date.now().toString(),
+      customerDataModel,
+      customerId,
+      products,
+      paymentMethod,
+      orderDescription,
+      totalPaymentAmount,
+      orderStatus,
+      paidAmount,
+      remainingAmount,
+      orderDate,
     });
     await newOrder.save();
     res
       .status(201)
-      .json({ msg: "Order m been placed successfully !", order: newOrder });
+      .json({ msg: "Order has been placed successfully !", order: newOrder });
   } catch (error) {
     console.log("error", error);
     res.status(400).json({ message: "Something Went Wrong !" });

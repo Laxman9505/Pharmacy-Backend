@@ -1,20 +1,25 @@
 /** @format */
-import { Document } from "mongoose";
+import { Document, Schema } from "mongoose";
+import { Customer } from "./customerInterfaces";
 
 export interface IOrder extends Document {
-  OrderId?: string;
-  CustomerName: string;
-  CustomerAddress: string;
-  TotalAmount: string;
-  OrderStatus: string;
-  OrderDate: string;
-  CountryId: string;
-  CityId: string;
-  ProductList: Product[];
-  OrderDescription: string;
+  customerDataModel: Customer;
+  totalPaymentAmount: Number;
+  orderStatus: string;
+  paymentMethod: string;
+  customerId: Schema.Types.ObjectId;
+  orderDate: string;
+  products: Product[];
+  orderDescription: string;
+  paidAmount: number;
+  remainingAmount: number;
+  discountAmount: number;
+  discountPercentage: number;
 }
 
 export interface Product {
-  Id: string;
-  ProductName: string;
+  id?: string;
+  productId: Schema.Types.ObjectId;
+  quantity: number;
+  boughtPrice: number;
 }
