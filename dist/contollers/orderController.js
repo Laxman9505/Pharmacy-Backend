@@ -14,7 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getNewOrderCreationData = exports.getAllOrders = exports.placeOrder = void 0;
-const uuid_1 = require("uuid");
 const inventoryModal_1 = __importDefault(require("../modal/inventoryModal"));
 const orderModal_1 = __importDefault(require("../modal/orderModal"));
 const productCategoryModal_1 = __importDefault(require("../modal/productCategoryModal"));
@@ -23,21 +22,23 @@ function placeOrder(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Generate the order ID
-            const orderId = (0, uuid_1.v4)();
-            const { ProductList, CustomerName, CustomerAddress, TotalAmount } = req.body;
+            const { customerDataModel, customerId, products, paymentMethod, orderDescription, totalPaymentAmount, orderStatus, paidAmount, remainingAmount, orderDate, } = req.body;
             const newOrder = new orderModal_1.default({
-                OrderId: orderId,
-                CustomerName: CustomerName,
-                CustomerAddress: CustomerAddress,
-                ProductList: ProductList,
-                TotalAmount: TotalAmount,
-                OrderStatus: "Placed",
-                OrderDate: Date.now().toString(),
+                customerDataModel,
+                customerId,
+                products,
+                paymentMethod,
+                orderDescription,
+                totalPaymentAmount,
+                orderStatus,
+                paidAmount,
+                remainingAmount,
+                orderDate,
             });
             yield newOrder.save();
             res
                 .status(201)
-                .json({ msg: "Order m been placed successfully !", order: newOrder });
+                .json({ msg: "Order has been placed successfully !", order: newOrder });
         }
         catch (error) {
             console.log("error", error);

@@ -94,7 +94,7 @@ function getAllProducts(req, res) {
                     model: "Supplier",
                     select: "supplierName", // Field to select from the referenced model
                 },
-            ]), page, perPage);
+            ]), page, perPage, searchKeyword);
             res.status(200).json(PaginationResult);
         }
         catch (error) {

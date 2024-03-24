@@ -16,8 +16,8 @@ const calculateSkip = (page, perPage) => {
     return (page - 1) * perPage;
 };
 // Function to paginate the database query
-const paginate = (model, query = {}, page, perPage) => __awaiter(void 0, void 0, void 0, function* () {
-    const skip = calculateSkip(page, perPage);
+const paginate = (model, query = {}, page, perPage, searchKeyword) => __awaiter(void 0, void 0, void 0, function* () {
+    const skip = searchKeyword ? 0 : calculateSkip(page, perPage);
     const countQuery = model.countDocuments(query);
     const dataQuery = query.skip(skip).limit(perPage);
     const [totalItems, items] = yield Promise.all([countQuery, dataQuery]);

@@ -25,31 +25,48 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
+const productSchema = new mongoose_1.Schema({
+    productId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Inventory", required: true },
+    quantity: { type: Number, required: true },
+    boughtPrice: { type: Number, required: true },
+});
+const customerDataModel = new mongoose_1.Schema({
+    firstName: { type: String },
+    lastName: { type: String },
+    email: { type: String },
+    phoneNumber: { type: Number },
+    address: {
+        type: String,
+    },
+});
 // Define the Order schema
 const OrderSchema = new mongoose_1.Schema({
-    OrderId: { type: String },
-    CustomerName: { type: String, required: true },
-    CustomerAddress: { type: String, required: true },
-    TotalAmount: { type: String, required: true },
-    OrderStatus: { type: String, required: true },
-    OrderDescription: { type: String },
-    ProductList: {
-        type: [
-            {
-                Id: { type: String, required: true },
-                ProductName: { type: String, required: true },
-                ProductImage: { type: String, required: true },
-                ProductPrice: { type: String, required: true },
-                ProductQuantity: { type: String, required: true },
-            },
-        ],
+    customerDataModel: customerDataModel,
+    customerId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Customer" },
+    products: [productSchema],
+    discountAmount: { type: Number },
+    discountPercentage: { type: Number },
+    paymentMethod: {
+        type: String,
+        enum: ["Cash", "Esewa", "PhonePay"],
         required: true,
     },
-    OrderDate: {
+    orderDescription: { type: String },
+    totalPaymentAmount: { type: Number, required: true },
+    orderStatus: {
+        type: String,
+        enum: ["Pending", "Completed"],
+        required: true,
+    },
+    paidAmount: { type: Number, required: true },
+    remainingAmount: { type: Number },
+    orderDate: {
         type: String,
         required: true,
         default: Date.now().toString(),
     },
+}, {
+    timestamps: true,
 });
-const orderModel = mongoose_1.default.model("Orders", OrderSchema);
+const orderModel = mongoose_1.default.model("Order", OrderSchema);
 exports.default = orderModel;
