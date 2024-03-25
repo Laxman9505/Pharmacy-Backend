@@ -1,6 +1,8 @@
 /** @format */
 
 import { Request, Response } from "express";
+import moment from "moment";
+import { IOrder } from "../interfaces/orderInterfaces";
 import InventoryModel from "../modal/inventoryModal";
 import orderModel from "../modal/orderModal";
 import ProductCategoryModel from "../modal/productCategoryModal";
@@ -20,7 +22,9 @@ export async function placeOrder(req: Request, res: Response) {
       orderStatus,
       paidAmount,
       remainingAmount,
-      orderDate,
+      discountAmount,
+      discountPercentage,
+      orderNo,
     } = req.body;
     const newOrder = new orderModel({
       customerDataModel,
@@ -32,12 +36,25 @@ export async function placeOrder(req: Request, res: Response) {
       orderStatus,
       paidAmount,
       remainingAmount,
-      orderDate,
+      orderNo,
+      discountAmount,
+      discountPercentage,
     });
     await newOrder.save();
-    res
-      .status(201)
-      .json({ msg: "Order has been placed successfully !", order: newOrder });
+
+    if (orderStatus == "Completed") {
+      const receipt = await generateReceipt(newOrder);
+      res.status(200).json({
+        isPaymentCompleted: true,
+        receipt: receipt,
+      });
+    } else {
+      res.status(201).json({
+        msg: "Order has been placed successfully !",
+        order: newOrder,
+        isPaymentCompleted: false,
+      });
+    }
   } catch (error) {
     console.log("error", error);
     res.status(400).json({ message: "Something Went Wrong !" });
@@ -60,6 +77,7 @@ export async function getAllOrders(req: Request, res: Response) {
 export async function getNewOrderCreationData(req: Request, res: Response) {
   try {
     // Fetch all categories
+    const totalNoOfOrders: number = await orderModel.countDocuments();
     const searchKeyword: string = (req.query.searchKeyword as string) || "";
     const searchPattern: RegExp = new RegExp(searchKeyword, "i");
 
@@ -94,7 +112,42 @@ export async function getNewOrderCreationData(req: Request, res: Response) {
       ),
     }));
 
-    res.status(200).json({ productsWithCategories: groupedProducts });
-    console.log("---product by cattegory", productsByCategory);
+    res.status(200).json({
+      productsWithCategories: groupedProducts,
+      orderNo: `#000${totalNoOfOrders + 1}`,
+    });
   } catch (error) {}
+}
+
+async function generateReceipt(order: IOrder): Promise<any> {
+  try {
+    // Populate the product names using the productId field
+    const populatedProducts = await Promise.all(
+      order.products.map(async (product) => {
+        const pro: any = await InventoryModel.findById(
+          product.productId,
+          "name"
+        );
+
+        return {
+          productName: pro.name,
+          quantity: product.quantity,
+          boughtPrice: product.boughtPrice,
+        };
+      })
+    );
+
+    return {
+      orderNo: order.orderNo,
+      customerName: `${order.customerDataModel.firstName} ${order.customerDataModel.lastName}`,
+      paymentMethod: order.paymentMethod,
+      totalPaymentAmount: order.totalPaymentAmount,
+      products: populatedProducts,
+      discountAmount: order.discountAmount,
+      orderDate: moment().format("YYYY-MM-DD"),
+    };
+  } catch (error) {
+    console.error("Error generating receipt:", error);
+    throw error;
+  }
 }

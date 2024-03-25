@@ -15,6 +15,7 @@ export interface IOrder extends Document {
   remainingAmount: number;
   discountAmount: number;
   discountPercentage: number;
+  orderNo: string;
 }
 
 export interface Product {
