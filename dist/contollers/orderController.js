@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getNewOrderCreationData = exports.getAllOrders = exports.placeOrder = void 0;
+const moment_1 = __importDefault(require("moment"));
 const inventoryModal_1 = __importDefault(require("../modal/inventoryModal"));
 const orderModal_1 = __importDefault(require("../modal/orderModal"));
 const productCategoryModal_1 = __importDefault(require("../modal/productCategoryModal"));
@@ -22,7 +23,7 @@ function placeOrder(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Generate the order ID
-            const { customerDataModel, customerId, products, paymentMethod, orderDescription, totalPaymentAmount, orderStatus, paidAmount, remainingAmount, orderDate, } = req.body;
+            const { customerDataModel, customerId, products, paymentMethod, orderDescription, totalPaymentAmount, orderStatus, paidAmount, remainingAmount, discountAmount, discountPercentage, orderNo, } = req.body;
             const newOrder = new orderModal_1.default({
                 customerDataModel,
                 customerId,
@@ -33,12 +34,25 @@ function placeOrder(req, res) {
                 orderStatus,
                 paidAmount,
                 remainingAmount,
-                orderDate,
+                orderNo,
+                discountAmount,
+                discountPercentage,
             });
             yield newOrder.save();
-            res
-                .status(201)
-                .json({ msg: "Order has been placed successfully !", order: newOrder });
+            if (orderStatus == "Completed") {
+                const receipt = yield generateReceipt(newOrder);
+                res.status(200).json({
+                    isPaymentCompleted: true,
+                    receipt: receipt,
+                });
+            }
+            else {
+                res.status(201).json({
+                    msg: "Order has been placed successfully !",
+                    order: newOrder,
+                    isPaymentCompleted: false,
+                });
+            }
         }
         catch (error) {
             console.log("error", error);
@@ -66,6 +80,7 @@ function getNewOrderCreationData(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Fetch all categories
+            const totalNoOfOrders = yield orderModal_1.default.countDocuments();
             const searchKeyword = req.query.searchKeyword || "";
             const searchPattern = new RegExp(searchKeyword, "i");
             const queryCondition = searchKeyword.trim().length > 0
@@ -89,10 +104,40 @@ function getNewOrderCreationData(req, res) {
                 categoryName: category.categoryName,
                 products: productsByCategory.filter((product) => { var _a; return (_a = product.category) === null || _a === void 0 ? void 0 : _a._id.equals(category._id); }),
             }));
-            res.status(200).json({ productsWithCategories: groupedProducts });
-            console.log("---product by cattegory", productsByCategory);
+            res.status(200).json({
+                productsWithCategories: groupedProducts,
+                orderNo: `#000${totalNoOfOrders + 1}`,
+            });
         }
         catch (error) { }
     });
 }
 exports.getNewOrderCreationData = getNewOrderCreationData;
+function generateReceipt(order) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            // Populate the product names using the productId field
+            const populatedProducts = yield Promise.all(order.products.map((product) => __awaiter(this, void 0, void 0, function* () {
+                const pro = yield inventoryModal_1.default.findById(product.productId, "name");
+                return {
+                    productName: pro.name,
+                    quantity: product.quantity,
+                    boughtPrice: product.boughtPrice,
+                };
+            })));
+            return {
+                orderNo: order.orderNo,
+                customerName: `${order.customerDataModel.firstName} ${order.customerDataModel.lastName}`,
+                paymentMethod: order.paymentMethod,
+                totalPaymentAmount: order.totalPaymentAmount,
+                products: populatedProducts,
+                discountAmount: order.discountAmount,
+                orderDate: (0, moment_1.default)().format("YYYY-MM-DD"),
+            };
+        }
+        catch (error) {
+            console.error("Error generating receipt:", error);
+            throw error;
+        }
+    });
+}

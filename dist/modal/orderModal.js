@@ -45,6 +45,7 @@ const OrderSchema = new mongoose_1.Schema({
     customerId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Customer" },
     products: [productSchema],
     discountAmount: { type: Number },
+    orderNo: { type: String },
     discountPercentage: { type: Number },
     paymentMethod: {
         type: String,

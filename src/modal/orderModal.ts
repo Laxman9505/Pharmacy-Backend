@@ -27,6 +27,7 @@ const OrderSchema: Schema = new Schema<IOrder>(
     customerId: { type: Schema.Types.ObjectId, ref: "Customer" },
     products: [productSchema],
     discountAmount: { type: Number },
+    orderNo: { type: String },
     discountPercentage: { type: Number },
     paymentMethod: {
       type: String,
