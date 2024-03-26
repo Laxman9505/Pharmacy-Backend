@@ -12,6 +12,7 @@ import orderRouter from "./routes/order";
 import productCategoriesRouter from "./routes/productCategory";
 import supplierRouter from "./routes/supplier";
 import dashboardRouter from "./routes/dashboard";
+import storeRouter from "./routes/store";
 import { CustomError, IErrorResponse } from "./utils/error-handler";
 
 dotenv.config();
@@ -37,6 +38,7 @@ app.use("/product-category", productCategoriesRouter);
 app.use("/supplier", supplierRouter);
 app.use("/customer", customerRouter);
 app.use("/dashboard", dashboardRouter);
+app.use("/store", storeRouter);
 
 app.use(
   (error: IErrorResponse, req: Request, res: Response, next: NextFunction) => {
