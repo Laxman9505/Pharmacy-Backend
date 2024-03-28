@@ -61,15 +61,70 @@ export async function placeOrder(req: Request, res: Response) {
   }
 }
 
+export async function cancelOrder(req: Request, res: Response) {
+  try {
+    const { orderId } = req.body;
+    const foundOrder: IOrder | null = await orderModel.findById(orderId);
+    if (foundOrder) {
+      if (foundOrder.orderStatus == "Cancelled") {
+        return res
+          .status(400)
+          .json({ message: "Order is cancelled already !" });
+      }
+      foundOrder.orderStatus = "Cancelled";
+      await foundOrder.save();
+      res.status(200).json({
+        message: `${foundOrder.orderNo} was cancelled successfully !`,
+      });
+    } else {
+      res.status(400).json({ message: "Order Id not found !" });
+    }
+  } catch (error) {
+    console.log("---error", error);
+    res.status(200).json({ message: "Something Went Wrong" });
+  }
+}
+
+export async function getOrderDetail(req: Request, res: Response) {
+  try {
+  } catch (error) {
+    res.status(200).json({ message: "Something Went Wrong" });
+  }
+}
+
 export async function getAllOrders(req: Request, res: Response) {
   try {
     const page: number = parseInt(req.query.page as string) || 1;
     const perPage: number = parseInt(req.query.perPage as string) || 10;
-    const PaginationResult = await paginate(orderModel, {}, page, perPage);
+    const searchKeyword: string = (req.query.searchKeyword as string) || "";
 
-    console.log("pagination result", PaginationResult);
+    const queryConditon =
+      searchKeyword.trim().length > 0
+        ? {
+            $or: [
+              {
+                orderNo: { $regex: new RegExp(searchKeyword, "i") },
+              },
+            ],
+          }
+        : {};
+
+    const PaginationResult = await paginate(
+      orderModel,
+      orderModel
+        .find(queryConditon)
+        .select(
+          "customerDataModel.firstName customerDataModel.lastName orderNo paymentMethod orderStatus orderDate totalPaymentAmount"
+        )
+        .sort({ orderDate: -1 }),
+      page,
+      perPage,
+      searchKeyword
+    );
+
     res.status(200).json(PaginationResult);
   } catch (error) {
+    console.log("---error", error);
     res.status(200).json({ message: "Something Went Wrong" });
   }
 }

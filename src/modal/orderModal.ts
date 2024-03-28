@@ -38,7 +38,7 @@ const OrderSchema: Schema = new Schema<IOrder>(
     totalPaymentAmount: { type: Number, required: true },
     orderStatus: {
       type: String,
-      enum: ["Pending", "Completed"],
+      enum: ["Pending", "Completed", "Cancelled"],
       required: true,
     },
     paidAmount: { type: Number, required: true },
@@ -53,7 +53,17 @@ const OrderSchema: Schema = new Schema<IOrder>(
     timestamps: true,
   }
 );
+OrderSchema.virtual("id").get(function (this: IOrder) {
+  return this._id;
+});
 
+OrderSchema.set("toJSON", {
+  virtuals: true,
+  versionKey: false,
+  transform: (doc, ret) => {
+    delete ret._id;
+  },
+});
 const orderModel = mongoose.model<IOrder>("Order", OrderSchema);
 
 export default orderModel;
