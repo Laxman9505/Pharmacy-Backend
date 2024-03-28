@@ -63,7 +63,7 @@ export async function placeOrder(req: Request, res: Response) {
 
 export async function cancelOrder(req: Request, res: Response) {
   try {
-    const { orderId } = req.body;
+    const orderId: string = req.params.id as string;
     const foundOrder: IOrder | null = await orderModel.findById(orderId);
     if (foundOrder) {
       if (foundOrder.orderStatus == "Cancelled") {
@@ -87,6 +87,12 @@ export async function cancelOrder(req: Request, res: Response) {
 
 export async function getOrderDetail(req: Request, res: Response) {
   try {
+    const orderId: string = req.params.id as string;
+    const order: IOrder | null = await orderModel.findById(orderId);
+    const populatedProducts = await getPopulatedProductsFromOrder(
+      order as IOrder
+    );
+    res.status(200).json({ products: populatedProducts });
   } catch (error) {
     res.status(200).json({ message: "Something Went Wrong" });
   }
@@ -177,20 +183,7 @@ export async function getNewOrderCreationData(req: Request, res: Response) {
 async function generateReceipt(order: IOrder): Promise<any> {
   try {
     // Populate the product names using the productId field
-    const populatedProducts = await Promise.all(
-      order.products.map(async (product) => {
-        const pro: any = await InventoryModel.findById(
-          product.productId,
-          "name"
-        );
-
-        return {
-          productName: pro.name,
-          quantity: product.quantity,
-          boughtPrice: product.boughtPrice,
-        };
-      })
-    );
+    const populatedProducts = await getPopulatedProductsFromOrder(order);
 
     return {
       orderNo: order.orderNo,
@@ -205,4 +198,19 @@ async function generateReceipt(order: IOrder): Promise<any> {
     console.error("Error generating receipt:", error);
     throw error;
   }
+}
+
+async function getPopulatedProductsFromOrder(order: IOrder) {
+  const populatedProducts = await Promise.all(
+    order.products.map(async (product) => {
+      const pro: any = await InventoryModel.findById(product.productId, "name");
+
+      return {
+        productName: pro.name,
+        quantity: product.quantity,
+        boughtPrice: product.boughtPrice,
+      };
+    })
+  );
+  return populatedProducts;
 }

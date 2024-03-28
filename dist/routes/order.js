@@ -9,5 +9,7 @@ const orderController_1 = require("../contollers/orderController");
 const router = express_1.default.Router();
 router.post("/placeOrder", orderController_1.placeOrder);
 router.get("/getAllOrders", orderController_1.getAllOrders);
+router.get("/getOrderDetail/:id", orderController_1.getOrderDetail);
+router.get("/cancelOrder/:id", orderController_1.cancelOrder);
 router.get("/getNewOrderCreationData", orderController_1.getNewOrderCreationData);
 exports.default = router;

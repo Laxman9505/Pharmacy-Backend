@@ -16,6 +16,7 @@ const order_1 = __importDefault(require("./routes/order"));
 const productCategory_1 = __importDefault(require("./routes/productCategory"));
 const supplier_1 = __importDefault(require("./routes/supplier"));
 const dashboard_1 = __importDefault(require("./routes/dashboard"));
+const store_1 = __importDefault(require("./routes/store"));
 const error_handler_1 = require("./utils/error-handler");
 dotenv_1.default.config();
 // import userRoutes from "./routes/userRoutes";
@@ -36,6 +37,7 @@ app.use("/product-category", productCategory_1.default);
 app.use("/supplier", supplier_1.default);
 app.use("/customer", customer_1.default);
 app.use("/dashboard", dashboard_1.default);
+app.use("/store", store_1.default);
 app.use((error, req, res, next) => {
     if (error instanceof error_handler_1.CustomError) {
         return res.status(error.statusCode).json(error.serializeError());

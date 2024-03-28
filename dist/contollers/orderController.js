@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getNewOrderCreationData = exports.getAllOrders = exports.placeOrder = void 0;
+exports.getNewOrderCreationData = exports.getAllOrders = exports.getOrderDetail = exports.cancelOrder = exports.placeOrder = void 0;
 const moment_1 = __importDefault(require("moment"));
 const inventoryModal_1 = __importDefault(require("../modal/inventoryModal"));
 const orderModal_1 = __importDefault(require("../modal/orderModal"));
@@ -61,16 +61,71 @@ function placeOrder(req, res) {
     });
 }
 exports.placeOrder = placeOrder;
+function cancelOrder(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const orderId = req.params.id;
+            const foundOrder = yield orderModal_1.default.findById(orderId);
+            if (foundOrder) {
+                if (foundOrder.orderStatus == "Cancelled") {
+                    return res
+                        .status(400)
+                        .json({ message: "Order is cancelled already !" });
+                }
+                foundOrder.orderStatus = "Cancelled";
+                yield foundOrder.save();
+                res.status(200).json({
+                    message: `${foundOrder.orderNo} was cancelled successfully !`,
+                });
+            }
+            else {
+                res.status(400).json({ message: "Order Id not found !" });
+            }
+        }
+        catch (error) {
+            console.log("---error", error);
+            res.status(200).json({ message: "Something Went Wrong" });
+        }
+    });
+}
+exports.cancelOrder = cancelOrder;
+function getOrderDetail(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const orderId = req.params.id;
+            const order = yield orderModal_1.default.findById(orderId);
+            const populatedProducts = yield getPopulatedProductsFromOrder(order);
+            res.status(200).json({ products: populatedProducts });
+        }
+        catch (error) {
+            res.status(200).json({ message: "Something Went Wrong" });
+        }
+    });
+}
+exports.getOrderDetail = getOrderDetail;
 function getAllOrders(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const page = parseInt(req.query.page) || 1;
             const perPage = parseInt(req.query.perPage) || 10;
-            const PaginationResult = yield (0, paginate_1.paginate)(orderModal_1.default, {}, page, perPage);
-            console.log("pagination result", PaginationResult);
+            const searchKeyword = req.query.searchKeyword || "";
+            const queryConditon = searchKeyword.trim().length > 0
+                ? {
+                    $or: [
+                        {
+                            orderNo: { $regex: new RegExp(searchKeyword, "i") },
+                        },
+                    ],
+                }
+                : {};
+            const PaginationResult = yield (0, paginate_1.paginate)(orderModal_1.default, orderModal_1.default
+                .find(queryConditon)
+                .select("customerDataModel.firstName customerDataModel.lastName orderNo paymentMethod orderStatus orderDate totalPaymentAmount")
+                .sort({ orderDate: -1 }), page, perPage, searchKeyword);
             res.status(200).json(PaginationResult);
         }
         catch (error) {
+            console.log("---error", error);
             res.status(200).json({ message: "Something Went Wrong" });
         }
     });
@@ -117,14 +172,7 @@ function generateReceipt(order) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Populate the product names using the productId field
-            const populatedProducts = yield Promise.all(order.products.map((product) => __awaiter(this, void 0, void 0, function* () {
-                const pro = yield inventoryModal_1.default.findById(product.productId, "name");
-                return {
-                    productName: pro.name,
-                    quantity: product.quantity,
-                    boughtPrice: product.boughtPrice,
-                };
-            })));
+            const populatedProducts = yield getPopulatedProductsFromOrder(order);
             return {
                 orderNo: order.orderNo,
                 customerName: `${order.customerDataModel.firstName} ${order.customerDataModel.lastName}`,
@@ -139,5 +187,18 @@ function generateReceipt(order) {
             console.error("Error generating receipt:", error);
             throw error;
         }
+    });
+}
+function getPopulatedProductsFromOrder(order) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const populatedProducts = yield Promise.all(order.products.map((product) => __awaiter(this, void 0, void 0, function* () {
+            const pro = yield inventoryModal_1.default.findById(product.productId, "name");
+            return {
+                productName: pro.name,
+                quantity: product.quantity,
+                boughtPrice: product.boughtPrice,
+            };
+        })));
+        return populatedProducts;
     });
 }

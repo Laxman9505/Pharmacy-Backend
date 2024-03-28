@@ -56,7 +56,7 @@ const OrderSchema = new mongoose_1.Schema({
     totalPaymentAmount: { type: Number, required: true },
     orderStatus: {
         type: String,
-        enum: ["Pending", "Completed"],
+        enum: ["Pending", "Completed", "Cancelled"],
         required: true,
     },
     paidAmount: { type: Number, required: true },
@@ -68,6 +68,16 @@ const OrderSchema = new mongoose_1.Schema({
     },
 }, {
     timestamps: true,
+});
+OrderSchema.virtual("id").get(function () {
+    return this._id;
+});
+OrderSchema.set("toJSON", {
+    virtuals: true,
+    versionKey: false,
+    transform: (doc, ret) => {
+        delete ret._id;
+    },
 });
 const orderModel = mongoose_1.default.model("Order", OrderSchema);
 exports.default = orderModel;
