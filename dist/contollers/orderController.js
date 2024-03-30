@@ -18,6 +18,7 @@ const moment_1 = __importDefault(require("moment"));
 const inventoryModal_1 = __importDefault(require("../modal/inventoryModal"));
 const orderModal_1 = __importDefault(require("../modal/orderModal"));
 const productCategoryModal_1 = __importDefault(require("../modal/productCategoryModal"));
+const storeModal_1 = __importDefault(require("../modal/storeModal"));
 const paginate_1 = require("../utils/paginate");
 function placeOrder(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -40,10 +41,12 @@ function placeOrder(req, res) {
             });
             yield newOrder.save();
             if (orderStatus == "Completed") {
+                const storeDetail = yield storeModal_1.default.findOne();
                 const receipt = yield generateReceipt(newOrder);
                 res.status(200).json({
                     isPaymentCompleted: true,
                     receipt: receipt,
+                    storeDetail: storeDetail,
                 });
             }
             else {

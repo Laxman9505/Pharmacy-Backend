@@ -6,6 +6,7 @@ import { IOrder } from "../interfaces/orderInterfaces";
 import InventoryModel from "../modal/inventoryModal";
 import orderModel from "../modal/orderModal";
 import ProductCategoryModel from "../modal/productCategoryModal";
+import storeModel from "../modal/storeModal";
 import { paginate } from "../utils/paginate";
 
 export async function placeOrder(req: Request, res: Response) {
@@ -43,10 +44,12 @@ export async function placeOrder(req: Request, res: Response) {
     await newOrder.save();
 
     if (orderStatus == "Completed") {
+      const storeDetail = await storeModel.findOne();
       const receipt = await generateReceipt(newOrder);
       res.status(200).json({
         isPaymentCompleted: true,
         receipt: receipt,
+        storeDetail: storeDetail,
       });
     } else {
       res.status(201).json({
