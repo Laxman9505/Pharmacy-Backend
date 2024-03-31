@@ -39,7 +39,6 @@ function placeOrder(req, res) {
                 discountAmount,
                 discountPercentage,
             });
-            yield newOrder.save();
             // Decrease the stock count of each product
             for (const { productId, quantity } of products) {
                 // Find the product by its ID
@@ -51,6 +50,7 @@ function placeOrder(req, res) {
                 product.quantityInStock -= quantity;
                 yield product.save();
             }
+            yield newOrder.save();
             if (orderStatus == "Completed") {
                 const storeDetail = yield storeModal_1.default.findOne();
                 const receipt = yield generateReceipt(newOrder);

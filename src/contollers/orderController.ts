@@ -43,7 +43,6 @@ export async function placeOrder(req: Request, res: Response) {
       discountAmount,
       discountPercentage,
     });
-    await newOrder.save();
 
     // Decrease the stock count of each product
     for (const { productId, quantity } of products) {
@@ -57,6 +56,7 @@ export async function placeOrder(req: Request, res: Response) {
       product.quantityInStock -= quantity;
       await product.save();
     }
+    await newOrder.save();
 
     if (orderStatus == "Completed") {
       const storeDetail = await storeModel.findOne();
