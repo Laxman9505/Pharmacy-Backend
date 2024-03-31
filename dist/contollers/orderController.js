@@ -40,6 +40,17 @@ function placeOrder(req, res) {
                 discountPercentage,
             });
             yield newOrder.save();
+            // Decrease the stock count of each product
+            for (const { productId, quantity } of products) {
+                // Find the product by its ID
+                const product = yield inventoryModal_1.default.findById(productId);
+                if (!product) {
+                    throw new Error(`Product with ID ${productId} not found`);
+                }
+                // Decrease the quantityInStock
+                product.quantityInStock -= quantity;
+                yield product.save();
+            }
             if (orderStatus == "Completed") {
                 const storeDetail = yield storeModal_1.default.findOne();
                 const receipt = yield generateReceipt(newOrder);

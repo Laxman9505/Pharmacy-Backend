@@ -2,6 +2,7 @@
 
 import { Request, Response } from "express";
 import moment from "moment";
+import { IRequest } from "../interfaces/inventoryInterfaces";
 import { IOrder } from "../interfaces/orderInterfaces";
 import InventoryModel from "../modal/inventoryModal";
 import orderModel from "../modal/orderModal";
@@ -27,6 +28,7 @@ export async function placeOrder(req: Request, res: Response) {
       discountPercentage,
       orderNo,
     } = req.body;
+
     const newOrder = new orderModel({
       customerDataModel,
       customerId,
@@ -42,6 +44,19 @@ export async function placeOrder(req: Request, res: Response) {
       discountPercentage,
     });
     await newOrder.save();
+
+    // Decrease the stock count of each product
+    for (const { productId, quantity } of products) {
+      // Find the product by its ID
+      const product: IRequest | null = await InventoryModel.findById(productId);
+      if (!product) {
+        throw new Error(`Product with ID ${productId} not found`);
+      }
+
+      // Decrease the quantityInStock
+      product.quantityInStock -= quantity;
+      await product.save();
+    }
 
     if (orderStatus == "Completed") {
       const storeDetail = await storeModel.findOne();
