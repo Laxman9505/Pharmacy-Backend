@@ -92,6 +92,8 @@ export async function getAllProducts(req: Request, res: Response) {
             $or: [
               { name: { $regex: new RegExp(searchKeyword, "i") } },
               { manufacturer: { $regex: new RegExp(searchKeyword, "i") } },
+              { formulation: { $regex: new RegExp(searchKeyword, "i") } },
+              { description: { $regex: new RegExp(searchKeyword, "i") } },
             ],
           }
         : {};

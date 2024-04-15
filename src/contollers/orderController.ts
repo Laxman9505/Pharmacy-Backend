@@ -6,7 +6,6 @@ import { IRequest } from "../interfaces/inventoryInterfaces";
 import { IOrder } from "../interfaces/orderInterfaces";
 import InventoryModel from "../modal/inventoryModal";
 import orderModel from "../modal/orderModal";
-import ProductCategoryModel from "../modal/productCategoryModal";
 import storeModel from "../modal/storeModal";
 import { paginate } from "../utils/paginate";
 
@@ -155,49 +154,45 @@ export async function getAllOrders(req: Request, res: Response) {
 
 export async function getNewOrderCreationData(req: Request, res: Response) {
   try {
-    // Fetch all categories
-    const totalNoOfOrders: number = await orderModel.countDocuments();
     const searchKeyword: string = (req.query.searchKeyword as string) || "";
     const searchPattern: RegExp = new RegExp(searchKeyword, "i");
 
-    const queryCondition =
-      searchKeyword.trim().length > 0
-        ? {
-            $or: [
-              {
-                name: { $regex: searchPattern },
-                manufacturer: { $regex: searchPattern },
-              },
-            ],
-          }
-        : {};
-
-    const categories = await ProductCategoryModel.find(
-      {},
-      { _id: 1, categoryName: 1 }
-    );
+    const queryCondition = {
+      $or: [
+        { name: { $regex: searchPattern } }, // Search by name
+        { manufacturer: { $regex: searchPattern } }, // Search by manufacturer
+        { formulation: { $regex: searchPattern } },
+        { description: { $regex: searchPattern } },
+      ],
+    };
 
     // Fetch products and populate the 'category' field
-    const productsByCategory = await InventoryModel.find(queryCondition)
-      .populate("category", "categoryName")
+    const products = await InventoryModel.find(queryCondition)
+      .populate("category", "categoryName") // Populate category field with categoryName
       .lean();
 
-    // Organize products by category
-    const groupedProducts = categories.map((category) => ({
-      categoryId: category._id,
-      categoryName: category.categoryName,
-      products: productsByCategory.filter((product: any) =>
-        product.category?._id.equals(category._id)
-      ),
-    }));
+    // Group products by category
+    const groupedProducts = products.reduce((acc: any, product: any) => {
+      const categoryId = product.category?._id.toString();
+      if (!acc[categoryId]) {
+        acc[categoryId] = {
+          categoryId: categoryId,
+          categoryName: product.category?.categoryName,
+          products: [],
+        };
+      }
+      acc[categoryId].products.push(product);
+      return acc;
+    }, {});
 
-    res.status(200).json({
-      productsWithCategories: groupedProducts,
-      orderNo: `#000${totalNoOfOrders + 1}`,
-    });
-  } catch (error) {}
+    res
+      .status(200)
+      .json({ productWithCategories: Object.values(groupedProducts) });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 }
-
 async function generateReceipt(order: IOrder): Promise<any> {
   try {
     // Populate the product names using the productId field

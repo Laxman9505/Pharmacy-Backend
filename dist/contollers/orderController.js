@@ -17,7 +17,6 @@ exports.getNewOrderCreationData = exports.getAllOrders = exports.getOrderDetail 
 const moment_1 = __importDefault(require("moment"));
 const inventoryModal_1 = __importDefault(require("../modal/inventoryModal"));
 const orderModal_1 = __importDefault(require("../modal/orderModal"));
-const productCategoryModal_1 = __importDefault(require("../modal/productCategoryModal"));
 const storeModal_1 = __importDefault(require("../modal/storeModal"));
 const paginate_1 = require("../utils/paginate");
 function placeOrder(req, res) {
@@ -148,37 +147,42 @@ exports.getAllOrders = getAllOrders;
 function getNewOrderCreationData(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            // Fetch all categories
-            const totalNoOfOrders = yield orderModal_1.default.countDocuments();
             const searchKeyword = req.query.searchKeyword || "";
             const searchPattern = new RegExp(searchKeyword, "i");
-            const queryCondition = searchKeyword.trim().length > 0
-                ? {
-                    $or: [
-                        {
-                            name: { $regex: searchPattern },
-                            manufacturer: { $regex: searchPattern },
-                        },
-                    ],
-                }
-                : {};
-            const categories = yield productCategoryModal_1.default.find({}, { _id: 1, categoryName: 1 });
+            const queryCondition = {
+                $or: [
+                    { name: { $regex: searchPattern } },
+                    { manufacturer: { $regex: searchPattern } },
+                    { formulation: { $regex: searchPattern } },
+                    { description: { $regex: searchPattern } },
+                ],
+            };
             // Fetch products and populate the 'category' field
-            const productsByCategory = yield inventoryModal_1.default.find(queryCondition)
-                .populate("category", "categoryName")
+            const products = yield inventoryModal_1.default.find(queryCondition)
+                .populate("category", "categoryName") // Populate category field with categoryName
                 .lean();
-            // Organize products by category
-            const groupedProducts = categories.map((category) => ({
-                categoryId: category._id,
-                categoryName: category.categoryName,
-                products: productsByCategory.filter((product) => { var _a; return (_a = product.category) === null || _a === void 0 ? void 0 : _a._id.equals(category._id); }),
-            }));
-            res.status(200).json({
-                productsWithCategories: groupedProducts,
-                orderNo: `#000${totalNoOfOrders + 1}`,
-            });
+            // Group products by category
+            const groupedProducts = products.reduce((acc, product) => {
+                var _a, _b;
+                const categoryId = (_a = product.category) === null || _a === void 0 ? void 0 : _a._id.toString();
+                if (!acc[categoryId]) {
+                    acc[categoryId] = {
+                        categoryId: categoryId,
+                        categoryName: (_b = product.category) === null || _b === void 0 ? void 0 : _b.categoryName,
+                        products: [],
+                    };
+                }
+                acc[categoryId].products.push(product);
+                return acc;
+            }, {});
+            res
+                .status(200)
+                .json({ productWithCategories: Object.values(groupedProducts) });
         }
-        catch (error) { }
+        catch (error) {
+            console.error("Error:", error);
+            res.status(500).json({ message: "Internal server error" });
+        }
     });
 }
 exports.getNewOrderCreationData = getNewOrderCreationData;
