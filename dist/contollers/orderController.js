@@ -149,6 +149,8 @@ function getNewOrderCreationData(req, res) {
         try {
             const searchKeyword = req.query.searchKeyword || "";
             const searchPattern = new RegExp(searchKeyword, "i");
+            const orderNo = yield orderModal_1.default.countDocuments();
+            console.log("--order no", orderNo);
             const queryCondition = {
                 $or: [
                     { name: { $regex: searchPattern } },
@@ -177,7 +179,10 @@ function getNewOrderCreationData(req, res) {
             }, {});
             res
                 .status(200)
-                .json({ productWithCategories: Object.values(groupedProducts) });
+                .json({
+                productWithCategories: Object.values(groupedProducts),
+                orderNo: orderNo + 1,
+            });
         }
         catch (error) {
             console.error("Error:", error);

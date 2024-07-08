@@ -156,6 +156,8 @@ export async function getNewOrderCreationData(req: Request, res: Response) {
   try {
     const searchKeyword: string = (req.query.searchKeyword as string) || "";
     const searchPattern: RegExp = new RegExp(searchKeyword, "i");
+    const orderNo: any = await orderModel.countDocuments();
+    console.log("--order no", orderNo);
 
     const queryCondition = {
       $or: [
@@ -187,7 +189,10 @@ export async function getNewOrderCreationData(req: Request, res: Response) {
 
     res
       .status(200)
-      .json({ productWithCategories: Object.values(groupedProducts) });
+      .json({
+        productWithCategories: Object.values(groupedProducts),
+        orderNo: orderNo + 1,
+      });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ message: "Internal server error" });
